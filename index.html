@@ -204,74 +204,74 @@
         const LOCATIONS = {
             fort: {
                 id: 'fort',
-                chapter: "記憶之一：權力的紅磚",
-                title: "安平古堡 (The Old Fort)",
-                desc: "熱蘭遮城的殘壁斷垣。荷蘭人曾在此建立統治，鄭成功曾在此改變歷史。紅磚縫隙裡，藏著多少次政權更迭的嘆息？",
+                chapter: "記憶之一：鬼祟的行人",
+                title: "海山館周遭（荷蘭通譯的住所）",
+                desc: "倉皇失措離開這裡的男子、散落一地的文書、鉅額的欠款，以及來路不明的寶物，究竟會指向哪裡呢？",
                 themeColor: 0x8B0000,
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/3ZW3eI2.jpeg',
                 // video: 'path/to/your/video.mp4', // TODO: Replace with your actual video file path
-                video: '1.mp4',
+                video: '6.mp4',
                 links: [
-                    { to: 'street', label: "往 喧囂的殘響 (老街)", pos: { x: 40, y: -5, z: -40 } },
-                    { to: 'treehouse', label: "往 被吞噬的屋舍 (樹屋)", pos: { x: -40, y: -5, z: 10 } }
+                    { to: 'street', label: "往 文朱殿（刑場）", pos: { x: 40, y: -5, z: -40 } },
+                    { to: 'treehouse', label: "往 考古埕周遭（富商唐人區）", pos: { x: -40, y: -5, z: 10 } }
                 ]
             },
             street: {
                 id: 'street',
-                chapter: "記憶之二：喧囂的殘響",
-                title: "安平老街 (Old Street)",
-                desc: "台灣第一街。曾經的貿易樞紐，如今充滿了遊客的喧鬧。但在這熱鬧之下，你是否聽得見三百年前商賈的叫賣聲？",
+                chapter: "記憶之二：刑場的對峙",
+                title: "文朱殿（刑場）",
+                desc: "刑場的對峙中，時間流速顯得異常緩慢。追捕他的究竟是荷蘭東印度公司的走狗，還是另有其人？",
                 themeColor: 0xDAA520,
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/x2oVkCl.jpeg',
-                video: '2.mp4',
+                video: '5.mp4',
 
                 links: [
-                    { to: 'fort', label: "回 權力的紅磚 (古堡)", pos: { x: -40, y: -5, z: 15 } },
-                    { to: 'tait', label: "往 洋人的足跡 (洋行)", pos: { x: 30, y: -5, z: -40 } }
+                    { to: 'fort', label: "回 海山館周遭（荷蘭通譯的住所）", pos: { x: -40, y: -5, z: 15 } },
+                    { to: 'tait', label: "往 義行劍獅（市集廣場）", pos: { x: 30, y: -5, z: -40 } }
                 ]
             },
             treehouse: {
                 id: 'treehouse',
-                chapter: "記憶之三：被吞噬的屋舍",
-                title: "安平樹屋 (Tree House)",
-                desc: "人去樓空，自然接管了一切。榕樹的氣根穿透了牆面，屋即是樹，樹即是屋。這是大自然對人類建築最溫柔也最殘酷的擁抱。",
+                chapter: "記憶之三：秘密的住所",
+                title: "考古埕周遭（富商唐人區）",
+                desc: "富商的身份只是一個掩護。這裡是一個穿越時空的錨點。兵分兩路後的決定，誰的判斷會是對的呢？",
                 themeColor: 0x2E8B57,
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/C4JHpXs.jpeg',
-                video: '3.mp4',
+                video: '1.mp4',
                 links: [
-                    { to: 'fort', label: "回 權力的紅磚", pos: { x: 40, y: -5, z: 20 } },
-                    { to: 'tait', label: "旁即 洋人的足跡", pos: { x: -30, y: -5, z: -30 } }
+                    { to: 'fort', label: "回 海山館周遭（荷蘭通譯的住所）", pos: { x: 40, y: -5, z: 20 } },
+                    { to: 'tait', label: "回 義行劍獅（市集廣場）", pos: { x: -30, y: -5, z: -30 } }
                 ]
             },
             tait: {
                 id: 'tait',
-                chapter: "記憶之四：洋人的足跡",
-                title: "德記洋行 (Tait & Co.)",
-                desc: "純白的拱廊，曾經堆滿了茶葉與樟腦。這些來自遠方的商人，在此留下了優雅的建築，隨後又在歷史的浪潮中撤離。",
+                chapter: "記憶之四：喧鬧的市場",
+                title: "義行劍獅（市集廣場）",
+                desc: "熙來攘往的市集，人流是最好的掩護，你在這裡部署了埋伏，有辦法守株待兔抓捕到穿梭時空的旅者嗎？",
                 themeColor: 0xE0FFFF,
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/VO0xqIo.jpeg',
                 video: '4.mp4',
                 links: [
-                    { to: 'treehouse', label: "往 被吞噬的屋舍", pos: { x: -30, y: -5, z: 20 } },
-                    { to: 'street', label: "往 喧囂的殘響", pos: { x: 30, y: -5, z: 30 } },
-                    { to: 'sunset', label: "往 終結的邊界 (觀夕)", pos: { x: 0, y: 0, z: -50 } }
+                    { to: 'treehouse', label: "往 考古埕周遭（富商唐人區）", pos: { x: -30, y: -5, z: 20 } },
+                    { to: 'street', label: "往 文朱殿（刑場）", pos: { x: 30, y: -5, z: 30 } },
+                    { to: 'sunset', label: "往 安平妙壽宮（市鎮醫院）", pos: { x: 0, y: 0, z: -50 } }
                 ]
             },
             sunset: {
                 id: 'sunset',
                 chapter: "記憶之五：終結的邊界",
-                title: "觀夕平台 (The End)",
-                desc: "陸地的盡頭，海洋的起點。所有的歷史、貿易、爭戰，最終都會像這落日一樣，沉入黑水溝的深處，歸於平靜。",
+                title: "安平妙壽宮（市鎮醫院）",
+                desc: "廟宇和醫院，是歷史中人潮與信仰的最終匯聚點。這場跨時代追逐，會迎來什麼樣的結局？",
                 themeColor: 0xFF4500,
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/aijduvF.jpeg',
-                video: '5.mp4',
+                video: '2.mp4',
                 links: [
-                    { to: 'tait', label: "回頭是岸 (回市區)", pos: { x: 0, y: -5, z: 40 } }
+                    { to: 'tait', label: "義行劍獅（市集廣場）", pos: { x: 0, y: -5, z: 40 } }
                 ]
             }
         };
