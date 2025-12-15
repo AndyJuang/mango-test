@@ -203,7 +203,7 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         // --- 故事化地點設定 (The Five Memories) ---
-                const LOCATIONS = {
+        const LOCATIONS = {
             fort: {
                 id: 'fort',
                 chapter: "記憶之一：鬼祟的行人",
@@ -213,9 +213,32 @@
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/3ZW3eI2.jpeg',
                 video: '6.mp4',
-                links: [
-                    { to: 'street', url: 'index2.html', label: "往 文朱殿（刑場）", pos: { x: 40, y: -5, z: -40 } },
-                    { to: 'treehouse', url: 'index3.html', label: "往 考古埕周遭（富商唐人區）", pos: { x: -40, y: -5, z: 10 } }
+                infos: [
+                    {
+                        title: "住宅",
+                        content: "這是一棟位在巷弄內的住宅，雖然現在看起來好像是一座很普通的民宅，但是透過手上的羅盤，你感覺到這個房舍在以前比周圍房舍更加整齊。牆面留有修補過的痕跡，門框卻仍維持良好狀態，顯示屋主並非貧困之人。門邊掛著簡單卻工整的標示，像是經常有人來往、出入頻繁的住處。門上看起來貼有一張告示，但是被撕去一部份。",
+                        pos: { x: -50, y: -5, z: -10 }
+                    },
+                    {
+                        title: "住宅內",
+                        content: "屋內桌面凌亂，像是被匆忙翻找過。幾封書信散落其間，紙張質地厚實，與一般往來書信明顯不同。書信上可見外文署名與紅色封蠟，其中一枚印記反覆出現。你透過羅盤的指引，貌似可以讀懂一些文字。此外，地板上也是異常凌亂，顯示這個人隨手收拾了一些東西之後就急忙離開了。",
+                        pos: { x: -30, y: -5, z: 30 }
+                    },
+                    {
+                        title: "人影",
+                        content: "巷口遠處，剛剛那名男子正快步離開。他身形瘦削，衣著簡樸卻整齊，肩上背著簡單的包袱，行走間不斷回頭張望，卻又深怕有人跟上。你依照著對安平的認知，那裏應該是前往文朱殿的方向，不知道他去那裏要做什麼事情。",
+                        pos: { x: 50, y: -5, z: -20 }
+                    },
+                    {
+                        title: "效忠街",
+                        content: "效忠街，是安平早期重要的街道之一，也是海頭社棋盤式街道中三條東西向的街道之一。雖然現在看起來只是寬度約 2 公尺的街道，但聽說從很久以前，這裡就聚集了許多與官方體制密切往來的人士，包含官員、富商與協助行政運作的居民等等。",
+                        pos: { x: 25, y: -5, z: -35 }
+                    },
+                    {
+                        title: "海山館",
+                        content: "海山館，是清代官兵在安平駐防後所建立的館舍之一。這類館舍不只是信仰空間，也是官兵聚會、聯絡與互助的重要場所。雖然海山館的建立時間晚於荷蘭時期，但它見證了安平在不同政權之下，權力與秩序不斷更替的歷史。",
+                        pos: { x: 0, y: -5, z: -50 }
+                    }
                 ]
             },
             street: {
@@ -227,9 +250,9 @@
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/x2oVkCl.jpeg',
                 video: '5.mp4',
-                links: [
-                    { to: 'fort', url: 'index1.html', label: "回 海山館周遭（荷蘭通譯的住所）", pos: { x: -40, y: -5, z: 15 } },
-                    { to: 'tait', url: 'index4.html', label: "往 義行劍獅（市集廣場）", pos: { x: 30, y: -5, z: -40 } }
+                infos: [
+                    { title: "海山館周遭", content: "荷蘭通譯的住所", pos: { x: -40, y: -5, z: 15 } },
+                    { title: "義行劍獅", content: "市集廣場", pos: { x: 30, y: -5, z: -40 } }
                 ]
             },
             treehouse: {
@@ -241,9 +264,9 @@
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/C4JHpXs.jpeg',
                 video: '1.mp4',
-                links: [
-                    { to: 'fort', url: 'index1.html', label: "回 海山館周遭（荷蘭通譯的住所）", pos: { x: 40, y: -5, z: 20 } },
-                    { to: 'tait', url: 'index4.html', label: "回 義行劍獅（市集廣場）", pos: { x: -30, y: -5, z: -30 } }
+                infos: [
+                    { title: "海山館周遭", content: "荷蘭通譯的住所", pos: { x: 40, y: -5, z: 20 } },
+                    { title: "義行劍獅", content: "市集廣場", pos: { x: -30, y: -5, z: -30 } }
                 ]
             },
             tait: {
@@ -255,10 +278,10 @@
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/VO0xqIo.jpeg',
                 video: '4.mp4',
-                links: [
-                    { to: 'treehouse', url: 'index3.html', label: "往 考古埕周遭（富商唐人區）", pos: { x: -30, y: -5, z: 20 } },
-                    { to: 'street', url: 'index2.html', label: "往 文朱殿（刑場）", pos: { x: 30, y: -5, z: 30 } },
-                    { to: 'sunset', url: 'index5.html', label: "往 安平妙壽宮（市鎮醫院）", pos: { x: 0, y: 0, z: -50 } }
+                infos: [
+                    { title: "考古埕周遭", content: "富商唐人區", pos: { x: -30, y: -5, z: 20 } },
+                    { title: "文朱殿", content: "刑場", pos: { x: 30, y: -5, z: 30 } },
+                    { title: "安平妙壽宮", content: "市鎮醫院", pos: { x: 0, y: 0, z: -50 } }
                 ]
             },
             sunset: {
@@ -270,8 +293,8 @@
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/aijduvF.jpeg',
                 video: '2.mp4',
-                links: [
-                    { to: 'tait', url: 'index4.html', label: "義行劍獅（市集廣場）", pos: { x: 0, y: -5, z: 40 } }
+                infos: [
+                    { title: "義行劍獅", content: "市集廣場", pos: { x: 0, y: -5, z: 40 } }
                 ]
             }
         };
@@ -463,53 +486,101 @@
             currentSphere = new THREE.Mesh(geometry, material);
             scene.add(currentSphere);
 
-            if (data.links) {
-                data.links.forEach(link => {
-                    createSprite(link, data.themeColor);
+            if (data.infos) {
+                data.infos.forEach(info => {
+                    createSprite(info, data.themeColor);
                 });
             }
         }
 
-        function createSprite(linkData, themeColorHex) {
+        function createSprite(infoData, themeColorHex) {
+            // 大幅放大 Canvas 解析度以容納長文字
+            const width = 1200;
+            const height = 900;
             const canvas = document.createElement('canvas');
-            canvas.width = 300;
-            canvas.height = 100;
+            canvas.width = width;
+            canvas.height = height;
             const ctx = canvas.getContext('2d');
 
             const color = new THREE.Color(themeColorHex);
             const colorStr = `rgb(${color.r * 255},${color.g * 255},${color.b * 255})`;
 
-            // 邊框風格
-            ctx.strokeStyle = colorStr;
-            ctx.lineWidth = 4;
-            ctx.strokeRect(10, 10, 280, 60);
-            ctx.fillStyle = "rgba(0,0,0,0.7)";
-            ctx.fillRect(10, 10, 280, 60);
+            // 背景
+            ctx.fillStyle = "rgba(0,0,0,0.85)";
+            ctx.fillRect(0, 0, width, height - 50); // reserve bottom for pointer
 
-            // 文字
-            ctx.font = "24px 'Noto Serif TC'";
-            ctx.fillStyle = "#fff";
+            // 邊框
+            ctx.strokeStyle = colorStr;
+            ctx.lineWidth = 15;
+            ctx.strokeRect(10, 10, width - 20, height - 70);
+
+            // 標題 (Title)
+            ctx.font = "bold 80px 'Noto Serif TC'";
+            ctx.fillStyle = colorStr; // Use theme color for title for contrast
             ctx.textAlign = "center";
-            ctx.fillText(linkData.label, 150, 50);
+            ctx.fillText(infoData.title, width / 2, 120);
+
+            // 分隔線
+            ctx.beginPath();
+            ctx.moveTo(100, 150);
+            ctx.lineTo(width - 100, 150);
+            ctx.strokeStyle = "#888";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 內文 (Content) - Multi-line Text Wrapping
+            ctx.font = "50px 'Noto Serif TC'";
+            ctx.fillStyle = "#eee";
+            ctx.textAlign = "left"; // Align left for paragraphs
+
+            const textX = 80;
+            const textY = 220;
+            const maxWidth = width - 160;
+            const lineHeight = 75;
+
+            wrapText(ctx, infoData.content, textX, textY, maxWidth, lineHeight);
 
             // 下方指標
             ctx.beginPath();
             ctx.fillStyle = colorStr;
-            ctx.moveTo(140, 75);
-            ctx.lineTo(160, 75);
-            ctx.lineTo(150, 95);
+            const centerX = width / 2;
+            const bottomY = height - 50;
+            ctx.moveTo(centerX - 30, bottomY);
+            ctx.lineTo(centerX + 30, bottomY);
+            ctx.lineTo(centerX, height);
             ctx.fill();
 
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
             const sprite = new THREE.Sprite(material);
 
-            sprite.position.set(linkData.pos.x, linkData.pos.y, linkData.pos.z);
-            sprite.scale.set(10, 3.3, 1);
-            sprite.userData = { targetId: linkData.to, targetUrl: linkData.url };
+            sprite.position.set(infoData.pos.x, infoData.pos.y, infoData.pos.z);
+            // 調整 Scale 以維持新的長寬比 (1200 / 900 = 1.33)
+            sprite.scale.set(30, 22.5, 1);
 
             scene.add(sprite);
             sprites.push(sprite);
+        }
+
+        // Helper function for wrapping text
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            let words = text.split(''); // Splitting by character for Chinese text
+            let line = '';
+
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n];
+                let metrics = ctx.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    ctx.fillText(line, x, y);
+                    line = words[n];
+                    y += lineHeight;
+                }
+                else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, x, y);
         }
 
         function onPointerDown(event) {
@@ -519,12 +590,9 @@
             const intersects = raycaster.intersectObjects(sprites);
 
             if (intersects.length > 0) {
-                const targetUrl = intersects[0].object.userData.targetUrl;
-                const overlay = document.getElementById('fade-overlay');
-                overlay.style.opacity = 1;
-                setTimeout(() => {
-                    if (targetUrl) window.location.href = targetUrl;
-                }, 500);
+                // Remove navigation logic
+                // const targetUrl = intersects[0].object.userData.targetUrl;
+                // ...
             }
         }
 
