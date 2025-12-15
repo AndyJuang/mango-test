@@ -148,12 +148,14 @@
 
 <body>
 
-    <div id="intro-screen">
+    <div id="intro-screen" style="display: none;">
+        <!-- 
         <div class="story-line">歷史，不會自己說話。</div>
         <div class="story-line">它只會在被遺忘之前，把真相藏給願意尋找的人。</div>
         <div class="story-line">這裡，藏著五段被抹去的記憶。</div>
         <div class="story-line">若你願意，就從這裡開始。</div>
         <button id="start-btn" onclick="enterGame()">開始尋找</button>
+         -->
     </div>
 
     <div id="fade-overlay" class="fade-overlay"></div>
@@ -205,7 +207,7 @@
             fort: {
                 id: 'fort',
                 chapter: "記憶之一：鬼祟的行人",
-                title: "海山館周遭（荷蘭通譯的住所）",
+                title: "何斌的住家",
                 desc: "倉皇失措離開這裡的男子、散落一地的文書、鉅額的欠款，以及來路不明的寶物，究竟會指向哪裡呢？",
                 themeColor: 0x8B0000,
                 bgType: 'grid',
@@ -290,6 +292,8 @@
 
         // --- 序章動畫 ---
         window.onload = function () {
+            // --- 註解掉序章動畫邏輯，直接進入 ---
+            /*
             const lines = document.querySelectorAll('.story-line');
             lines.forEach((line, index) => {
                 setTimeout(() => {
@@ -300,8 +304,9 @@
             setTimeout(() => {
                 document.getElementById('start-btn').style.opacity = 1;
             }, 800 * (lines.length + 1) + 500);
+            */
 
-            initThreeJS(); // 預先載入 3D，但在背景執行
+            initThreeJS(); // 預先載入 3D
 
             // Setup video button
             const videoBtn = document.getElementById('video-btn');
@@ -314,6 +319,11 @@
                     videoBtn.innerText = "播放影片";
                 }
             });
+
+            // 直接顯示介面並開始
+            const ui = document.getElementById('ui-container');
+            ui.style.opacity = 1;
+            animate();
 
             // Try to play music on load
             const bgMusic = document.getElementById('bg-music');
