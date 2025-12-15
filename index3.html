@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>安平：五段被抹去的記憶</title>
+    <title>考古埕周遭</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap');
 
@@ -16,58 +16,92 @@
             color: #ddd;
         }
 
-        /* --- 序章故事螢幕 --- */
-        #intro-screen {
+        /* --- 刮刮樂小遊戲 --- */
+        #scratch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #111;
+        }
+
+        #scratch-container {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            border: 2px solid #555;
+            user-select: none;
+        }
+
+        #secret-content {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000;
-            z-index: 2000;
+            background: linear-gradient(135deg, #1a0505, #441111);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            color: #f0f0f0;
             text-align: center;
+            z-index: 1;
             padding: 20px;
             box-sizing: border-box;
-            transition: opacity 1.5s ease-in-out;
         }
 
-        .story-line {
-            font-size: 1.2rem;
+        #secret-text {
+            font-size: 2rem;
             margin-bottom: 20px;
+            text-shadow: 0 0 10px #e15f41;
             opacity: 0;
-            transform: translateY(10px);
-            transition: all 1s ease-out;
-            color: #f0f0f0;
-            letter-spacing: 2px;
+            transition: opacity 1s;
         }
 
-        .story-line.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        #start-btn {
-            margin-top: 40px;
-            padding: 12px 30px;
-            background: transparent;
-            border: 1px solid #e15f41;
-            color: #e15f41;
-            font-family: "Noto Serif TC", serif;
-            font-size: 1rem;
-            cursor: pointer;
-            opacity: 0;
-            transition: all 0.5s;
-            letter-spacing: 3px;
-        }
-
-        #start-btn:hover {
+        #enter-game-btn {
+            padding: 10px 30px;
+            font-size: 1.2rem;
             background: #e15f41;
-            color: #000;
-            box-shadow: 0 0 15px rgba(225, 95, 65, 0.5);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            font-family: "Noto Serif TC", serif;
+        }
+
+        #scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            cursor: pointer;
+            touch-action: none;
+            /* 防止手機滑動頁面 */
+        }
+
+        .scratch-hint {
+            position: absolute;
+            bottom: -40px;
+            width: 100%;
+            text-align: center;
+            color: #888;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        /* --- 序章故事螢幕 (保留但隱藏) --- */
+        #intro-screen {
+            display: none;
         }
 
         /* --- 遊戲 UI --- */
@@ -148,18 +182,19 @@
 
 <body>
 
-    <div id="intro-screen" style="display: none;">
-        <!-- 
-        <div class="story-line">歷史，不會自己說話。</div>
-        <div class="story-line">它只會在被遺忘之前，把真相藏給願意尋找的人。</div>
-        <div class="story-line">這裡，藏著五段被抹去的記憶。</div>
-        <div class="story-line">若你願意，就從這裡開始。</div>
-        <button id="start-btn" onclick="enterGame()">開始尋找</button>
-         -->
+    <!-- Scratch Game Overlay -->
+    <div id="scratch-overlay">
+        <div id="scratch-container">
+            <div id="secret-content">
+                <div id="secret-text">消失的契約</div>
+                <button id="enter-game-btn">進入記憶</button>
+            </div>
+            <canvas id="scratch-canvas" width="600" height="400"></canvas>
+            <div class="scratch-hint">請刮開上方銀漆以尋找線索...</div>
+        </div>
     </div>
 
-    <div id="fade-overlay" class="fade-overlay"></div>
-
+    <!-- Original UI (Hidden initially) -->
     <div id="ui-container">
         <div class="header">
             <div class="chapter-tag" id="location-chapter">序章</div>
@@ -178,6 +213,8 @@
             </button>
         </div>
     </div>
+
+    <div id="fade-overlay" class="fade-overlay"></div>
 
     <!-- Hidden Video Element -->
     <video id="video-player" loop crossOrigin="anonymous" playsinline style="display:none;">
@@ -202,76 +239,170 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+        // --- Scratch Game Logic ---
+        function initScratchGame() {
+            const canvas = document.getElementById('scratch-canvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Fill with silver overlay
+            ctx.fillStyle = '#C0C0C0';
+            ctx.fillRect(0, 0, width, height);
+
+            // Add some noise/texture to make it look like scratch card
+            ctx.fillStyle = '#000';
+            for (let i = 0; i < 500; i++) {
+                ctx.fillRect(Math.random() * width, Math.random() * height, 2, 2);
+            }
+
+            // Text on overlay
+            ctx.font = "30px 'Noto Serif TC'";
+            ctx.fillStyle = "#555";
+            ctx.textAlign = "center";
+            ctx.fillText("?", width / 2, height / 2);
+
+            let isDrawing = false;
+            let lastPoint = null;
+
+            function getBrushPos(xRef, yRef) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: (xRef - rect.left) * (canvas.width / rect.width),
+                    y: (yRef - rect.top) * (canvas.height / rect.height)
+                };
+            }
+
+            function startDraw(e) {
+                isDrawing = true;
+                const { clientX, clientY } = e.touches ? e.touches[0] : e;
+                lastPoint = getBrushPos(clientX, clientY);
+            }
+
+            function moveDraw(e) {
+                if (!isDrawing) return;
+                e.preventDefault(); // prevent scrolling on touch
+
+                const { clientX, clientY } = e.touches ? e.touches[0] : e;
+                const currentPoint = getBrushPos(clientX, clientY);
+
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineWidth = 100; // 筆刷放大
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                ctx.beginPath();
+                if (lastPoint) {
+                    ctx.moveTo(lastPoint.x, lastPoint.y);
+                    ctx.lineTo(currentPoint.x, currentPoint.y);
+                } else {
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(currentPoint.x + 0.1, currentPoint.y + 0.1);
+                }
+                ctx.stroke();
+
+                lastPoint = currentPoint;
+                checkReveal();
+            }
+
+            function endDraw() {
+                isDrawing = false;
+                lastPoint = null;
+            }
+
+            // Events
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', moveDraw);
+            canvas.addEventListener('mouseup', endDraw);
+            canvas.addEventListener('mouseleave', endDraw);
+
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', moveDraw, { passive: false });
+            canvas.addEventListener('touchend', endDraw);
+
+            let revealed = false;
+            function checkReveal() {
+                if (revealed) return;
+                // Simply check every 20th pixel to save perf
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const pixels = imageData.data;
+                let transparentPixels = 0;
+                const totalPixels = pixels.length / 4;
+
+                for (let i = 0; i < pixels.length; i += 4 * 20) {
+                    if (pixels[i + 3] < 128) {
+                        transparentPixels++;
+                    }
+                }
+
+                // 若刮開超過 25% 即可
+                if (transparentPixels / (totalPixels / 20) > 0.25) {
+                    revealed = true;
+                    onRevealed();
+                }
+            }
+        }
+
+        function onRevealed() {
+            document.getElementById('secret-text').style.opacity = 1;
+            const btn = document.getElementById('enter-game-btn');
+            btn.style.opacity = 1;
+            btn.style.pointerEvents = 'auto';
+
+            // Fade out canvas smoothly
+            const canvas = document.getElementById('scratch-canvas');
+            canvas.style.transition = 'opacity 1s';
+            canvas.style.opacity = 0;
+
+            setTimeout(() => {
+                canvas.style.display = 'none';
+            }, 1000);
+        }
+
+        document.getElementById('enter-game-btn').addEventListener('click', () => {
+            const overlay = document.getElementById('scratch-overlay');
+            overlay.style.transition = 'opacity 1s';
+            overlay.style.opacity = 0;
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                enterMainGame();
+            }, 1000);
+        });
+
         // --- 故事化地點設定 (The Five Memories) ---
-                const LOCATIONS = {
-            fort: {
-                id: 'fort',
-                chapter: "記憶之一：鬼祟的行人",
-                title: "何斌的住家",
-                desc: "倉皇失措離開這裡的男子、散落一地的文書、鉅額的欠款，以及來路不明的寶物，究竟會指向哪裡呢？",
-                themeColor: 0x8B0000,
-                bgType: 'grid',
-                defaultImage: 'https://i.imgur.com/3ZW3eI2.jpeg',
-                video: '6.mp4',
-                links: [
-                    { to: 'street', url: 'index2.html', label: "往 文朱殿（刑場）", pos: { x: 40, y: -5, z: -40 } },
-                    { to: 'treehouse', url: 'index3.html', label: "往 考古埕周遭（富商唐人區）", pos: { x: -40, y: -5, z: 10 } }
-                ]
-            },
-            street: {
-                id: 'street',
-                chapter: "記憶之二：刑場的對峙",
-                title: "文朱殿（刑場）",
-                desc: "刑場的對峙中，時間流速顯得異常緩慢。追捕他的究竟是荷蘭東印度公司的走狗，還是另有其人？",
-                themeColor: 0xDAA520,
-                bgType: 'grid',
-                defaultImage: 'https://i.imgur.com/x2oVkCl.jpeg',
-                video: '5.mp4',
-                links: [
-                    { to: 'fort', url: 'index1.html', label: "回 海山館周遭（荷蘭通譯的住所）", pos: { x: -40, y: -5, z: 15 } },
-                    { to: 'tait', url: 'index4.html', label: "往 義行劍獅（市集廣場）", pos: { x: 30, y: -5, z: -40 } }
-                ]
-            },
+        const LOCATIONS = {
             treehouse: {
                 id: 'treehouse',
                 chapter: "記憶之三：秘密的住所",
                 title: "考古埕周遭（富商唐人區）",
-                desc: "富商的身份只是一個掩護。這裡是一個穿越時空的錨點。兵分兩路後的決定，誰的判斷會是對的呢？",
+                desc: "你依照那個人留下的線索，來到延平老街上附近一棟不起眼的老宅。但透過羅盤，你看的出來這裡也透付出不少的時空能量。",
                 themeColor: 0x2E8B57,
                 bgType: 'grid',
                 defaultImage: 'https://i.imgur.com/C4JHpXs.jpeg',
                 video: '1.mp4',
-                links: [
-                    { to: 'fort', url: 'index1.html', label: "回 海山館周遭（荷蘭通譯的住所）", pos: { x: 40, y: -5, z: 20 } },
-                    { to: 'tait', url: 'index4.html', label: "回 義行劍獅（市集廣場）", pos: { x: -30, y: -5, z: -30 } }
-                ]
-            },
-            tait: {
-                id: 'tait',
-                chapter: "記憶之四：喧鬧的市場",
-                title: "義行劍獅（市集廣場）",
-                desc: "熙來攘往的市集，人流是最好的掩護，你在這裡部署了埋伏，有辦法守株待兔抓捕到穿梭時空的旅者嗎？",
-                themeColor: 0xE0FFFF,
-                bgType: 'grid',
-                defaultImage: 'https://i.imgur.com/VO0xqIo.jpeg',
-                video: '4.mp4',
-                links: [
-                    { to: 'treehouse', url: 'index3.html', label: "往 考古埕周遭（富商唐人區）", pos: { x: -30, y: -5, z: 20 } },
-                    { to: 'street', url: 'index2.html', label: "往 文朱殿（刑場）", pos: { x: 30, y: -5, z: 30 } },
-                    { to: 'sunset', url: 'index5.html', label: "往 安平妙壽宮（市鎮醫院）", pos: { x: 0, y: 0, z: -50 } }
-                ]
-            },
-            sunset: {
-                id: 'sunset',
-                chapter: "記憶之五：終結的邊界",
-                title: "安平妙壽宮（市鎮醫院）",
-                desc: "廟宇和醫院，是歷史中人潮與信仰的最終匯聚點。這場跨時代追逐，會迎來什麼樣的結局？",
-                themeColor: 0xFF4500,
-                bgType: 'grid',
-                defaultImage: 'https://i.imgur.com/aijduvF.jpeg',
-                video: '2.mp4',
-                links: [
-                    { to: 'tait', url: 'index4.html', label: "義行劍獅（市集廣場）", pos: { x: 0, y: -5, z: 40 } }
+                infos: [
+                    {
+                        title: "秘密基地",
+                        content: "你看著牆上很多的資料還有文獻，從荷蘭時期一直到日治都有。「本機構負責監控並修正非正常時間接觸事件。」「代號：TAM1684，狀態：失聯／誤啟動」旁邊有一張當時的地圖。",
+                        pos: { x: 0, y: -5, z: 45 }
+                    },
+                    {
+                        title: "白哥",
+                        content: "「我知道你現在一定一頭霧水。」「簡單說吧，我確實是漢人富商，但那只是我留在這個時代的身份。」「我們機構的工作就是穿越時空解決各個時代的問題。」「而你手上的羅盤，就是我們用來尋找有錯誤能量的設備，也不知道為什麼你碰巧獲得了。」白哥停頓了一下，指向牆上的圖「那個盒子不是什麼古物，它是時空錨點機。」這不就是剛剛何斌身上掉落的物品嗎。「原本的用途，是讓不同時間的人，能在『固定節點』短暫停留，簡單來說就是穿越時空。」他皺了皺眉。「但這個何斌在跑路的時候，意外地拿走了不屬於他的東西，才導致了這個情況，我篤定他會往人潮多的地方逃跑。」",
+                        pos: { x: -45, y: -5, z: 0 },
+                        width: 1800,
+                        height: 1300
+                    },
+                    {
+                        title: "延平老街",
+                        content: "延平街，即今日所稱的安平老街，又稱為安平第一街，形成於 17 世紀荷蘭統治時期，原為連接熱蘭遮城與市鎮的重要通道。歷經不同政權更替，此地始終是安平商業與生活活動的核心。",
+                        pos: { x: 0, y: -5, z: -45 }
+                    },
+                    {
+                        title: "考古埕",
+                        content: "這裡是考古埕，現在可以看到一個大的考古探坑位於這裡，裡面呈現了有各個不同時代的地層還有建築樣貌，是一個適合全家大小出遊的地方。",
+                        pos: { x: 45, y: -5, z: 0 }
+                    }
                 ]
             }
         };
@@ -285,26 +416,13 @@
         const textureLoader = new THREE.TextureLoader();
         let videoElement, videoTexture;
 
-        // 綁定給 HTML 使用
-        window.enterGame = enterGame;
-
-        // --- 序章動畫 ---
+        // --- 序章動畫 / 初始化 ---
         window.onload = function () {
-            // --- 註解掉序章動畫邏輯，直接進入 ---
-            /*
-            const lines = document.querySelectorAll('.story-line');
-            lines.forEach((line, index) => {
-                setTimeout(() => {
-                    line.classList.add('visible');
-                }, 800 * (index + 1));
-            });
+            // 初始化刮刮樂
+            initScratchGame();
 
-            setTimeout(() => {
-                document.getElementById('start-btn').style.opacity = 1;
-            }, 800 * (lines.length + 1) + 500);
-            */
-
-            initThreeJS(); // 預先載入 3D
+            // 預先載入 3D 但不顯示
+            initThreeJS();
 
             // Setup video button
             const videoBtn = document.getElementById('video-btn');
@@ -317,37 +435,21 @@
                     videoBtn.innerText = "播放影片";
                 }
             });
+        };
 
-            // 直接顯示介面並開始
+        function enterMainGame() {
             const ui = document.getElementById('ui-container');
             ui.style.opacity = 1;
+
+            // 開始渲染迴圈
             animate();
 
-            // Try to play music on load
+            // Play music
             const bgMusic = document.getElementById('bg-music');
             bgMusic.volume = 0.5;
             bgMusic.play().catch(error => {
                 console.log("Autoplay prevented by browser policy. Music will start on interaction.");
             });
-        };
-
-        function enterGame() {
-            const intro = document.getElementById('intro-screen');
-            const ui = document.getElementById('ui-container');
-
-            // Ensure music is playing
-            const bgMusic = document.getElementById('bg-music');
-            if (bgMusic.paused) {
-                bgMusic.play().catch(e => console.error("Music play failed:", e));
-            }
-
-            intro.style.opacity = 0;
-            setTimeout(() => {
-                intro.style.display = 'none';
-                ui.style.opacity = 1;
-                // 開始渲染迴圈
-                animate();
-            }, 1500);
         }
 
         // --- Three.js 核心 ---
@@ -364,6 +466,10 @@
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableZoom = false;
             controls.rotateSpeed = -0.5;
+
+            // 設定初始視角朝左 (90度)
+            controls.target.set(-1, 0, 0);
+            controls.update();
 
             raycaster = new THREE.Raycaster();
             mouse = new THREE.Vector2();
@@ -463,69 +569,105 @@
             currentSphere = new THREE.Mesh(geometry, material);
             scene.add(currentSphere);
 
-            if (data.links) {
-                data.links.forEach(link => {
-                    createSprite(link, data.themeColor);
+            if (data.infos) {
+                data.infos.forEach(info => {
+                    createSprite(info, data.themeColor);
                 });
             }
         }
 
-        function createSprite(linkData, themeColorHex) {
+        function createSprite(infoData, themeColorHex) {
+            const width = infoData.width || 1200;
+            const height = infoData.height || 900;
             const canvas = document.createElement('canvas');
-            canvas.width = 300;
-            canvas.height = 100;
+            canvas.width = width;
+            canvas.height = height;
             const ctx = canvas.getContext('2d');
 
             const color = new THREE.Color(themeColorHex);
             const colorStr = `rgb(${color.r * 255},${color.g * 255},${color.b * 255})`;
 
-            // 邊框風格
-            ctx.strokeStyle = colorStr;
-            ctx.lineWidth = 4;
-            ctx.strokeRect(10, 10, 280, 60);
-            ctx.fillStyle = "rgba(0,0,0,0.7)";
-            ctx.fillRect(10, 10, 280, 60);
-
-            // 文字
-            ctx.font = "24px 'Noto Serif TC'";
-            ctx.fillStyle = "#fff";
-            ctx.textAlign = "center";
-            ctx.fillText(linkData.label, 150, 50);
-
-            // 下方指標
+            // Background
+            ctx.fillStyle = "rgba(0,0,0,0.85)";
             ctx.beginPath();
+            ctx.roundRect(0, 0, width, height - 100, 40);
+            ctx.fill();
+
+            // Border
+            ctx.strokeStyle = colorStr;
+            ctx.lineWidth = 15;
+            ctx.stroke();
+
+            // Title
+            ctx.font = "bold 80px 'Noto Serif TC'";
             ctx.fillStyle = colorStr;
-            ctx.moveTo(140, 75);
-            ctx.lineTo(160, 75);
-            ctx.lineTo(150, 95);
+            ctx.textAlign = "left";
+            ctx.fillText(infoData.title, 80, 120);
+
+            // Separator Line
+            ctx.beginPath();
+            ctx.strokeStyle = "#555";
+            ctx.lineWidth = 4;
+            ctx.moveTo(80, 150);
+            ctx.lineTo(width - 80, 150);
+            ctx.stroke();
+
+            // Content - Multi-line Text Wrapping
+            ctx.font = "50px 'Noto Serif TC'";
+            ctx.fillStyle = "#eee";
+            ctx.textAlign = "left";
+
+            // Draw content text with wrapping
+            const textX = 80;
+            const textY = 220;
+            const maxWidth = width - 160;
+            const lineHeight = 75;
+            wrapText(ctx, infoData.content, textX, textY, maxWidth, lineHeight);
+
+            // Pointer (Triangle at bottom)
+            ctx.beginPath();
+            ctx.fillStyle = colorStr; // Use theme color for pointer
+            ctx.moveTo(width / 2 - 40, height - 100);
+            ctx.lineTo(width / 2 + 40, height - 100);
+            ctx.lineTo(width / 2, height);
             ctx.fill();
 
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
             const sprite = new THREE.Sprite(material);
 
-            sprite.position.set(linkData.pos.x, linkData.pos.y, linkData.pos.z);
-            sprite.scale.set(10, 3.3, 1);
-            sprite.userData = { targetId: linkData.to, targetUrl: linkData.url };
+            sprite.position.set(infoData.pos.x, infoData.pos.y, infoData.pos.z);
+            sprite.scale.set(width / 40, height / 40, 1);
 
             scene.add(sprite);
             sprites.push(sprite);
         }
 
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            let words = text.split(''); // Splitting by character for Chinese text
+            let line = '';
+
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n];
+                let metrics = ctx.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    ctx.fillText(line, x, y);
+                    line = words[n];
+                    y += lineHeight;
+                }
+                else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, x, y);
+        }
+
         function onPointerDown(event) {
+            // Remove navigation logic
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(sprites);
-
-            if (intersects.length > 0) {
-                const targetUrl = intersects[0].object.userData.targetUrl;
-                const overlay = document.getElementById('fade-overlay');
-                overlay.style.opacity = 1;
-                setTimeout(() => {
-                    if (targetUrl) window.location.href = targetUrl;
-                }, 500);
-            }
         }
 
         function onWindowResize() {
