@@ -563,9 +563,38 @@
             }
         }
 
-        function createSprite(infoData, themeColorHex) {
-            const width = infoData.width || 1600; // Increased default
-            const height = infoData.height || 1200; // Increased default
+        function createIconTexture(themeColorHex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            const color = new THREE.Color(themeColorHex);
+            const colorStr = `rgb(${color.r * 255},${color.g * 255},${color.b * 255})`;
+
+            // 圓形背景
+            ctx.beginPath();
+            ctx.arc(64, 64, 50, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(0,0,0,0.8)";
+            ctx.fill();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = colorStr;
+            ctx.stroke();
+
+            // 驚嘆號 !
+            ctx.fillStyle = "#FFFF00";
+            ctx.font = "bold 80px 'Noto Serif TC', serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("!", 64, 68);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createContentTexture(infoData, themeColorHex) {
+            // 大幅放大 Canvas 解析度以容納長文字
+            const width = 1600;
+            const height = 1200;
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
@@ -611,8 +640,10 @@
             // Draw content text with wrapping
             const textX = 80;
             let textY = 240;
-            let maxWidth = width - 160;
             const lineHeight = 80;
+            let maxWidth = width - 160;
+
+            const texture = new THREE.CanvasTexture(canvas);
 
             // 如果有圖片，進行排版調整 (side-by-side)
             if (infoData.overlayImg) {
@@ -648,30 +679,54 @@
                     ctx.lineWidth = 5;
                     ctx.strokeRect(drawX, imgY, drawW, drawH);
 
-                    // Since sprite texture is already created, we need to update it
-                    // But here we are creating it initially. 
-                    // The texture needs to be updated after image loads.
-                    texture.needsUpdate = true;
+                    texture.needsUpdate = true; // 通知 Three.js 更新貼圖
                 };
                 img.src = infoData.overlayImg;
             }
+
+            // 如果有背景圖 (bgImg) 的邏輯 (從 index1 移植過來以防萬一用到)
+            // 但 index2 沒用這段，所以這裡先保持 index2 的邏輯 (只處理 overlayImg)
+            // 若需要支援 bgImg (信紙背景)，需要額外加入。 
+            // 這裡先完全複製 index2 的邏輯。
 
             wrapText(ctx, infoData.content, textX, textY, maxWidth, lineHeight);
 
             // Pointer (Triangle at bottom)
             ctx.beginPath();
-            ctx.fillStyle = colorStr; // Use theme color for pointer
+            ctx.fillStyle = colorStr;
             ctx.moveTo(width / 2 - 40, height - 50);
             ctx.lineTo(width / 2 + 40, height - 50);
             ctx.lineTo(width / 2, height);
             ctx.fill();
 
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+            return texture;
+        }
+
+        function createSprite(infoData, themeColorHex) {
+            // 1. 建立內容貼圖 (Content Texture)
+            const contentTexture = createContentTexture(infoData, themeColorHex);
+
+            // 2. 建立圖示貼圖 (Icon Texture)
+            const iconTexture = createIconTexture(themeColorHex);
+
+            // 3. 初始狀態：使用圖示
+            const material = new THREE.SpriteMaterial({ map: iconTexture, depthTest: false });
             const sprite = new THREE.Sprite(material);
 
             sprite.position.set(infoData.pos.x, infoData.pos.y, infoData.pos.z);
-            sprite.scale.set(width / 40, height / 40, 1);
+
+            // 初始大小：小圖示
+            const smallScale = new THREE.Vector3(5, 5, 1);
+            const largeScale = new THREE.Vector3(40, 30, 1);
+            sprite.scale.copy(smallScale);
+
+            sprite.userData = {
+                isExpanded: false,
+                iconTexture: iconTexture,
+                contentTexture: contentTexture,
+                smallScale: smallScale,
+                largeScale: largeScale
+            };
 
             scene.add(sprite);
             sprites.push(sprite);
@@ -698,10 +753,26 @@
         }
 
         function onPointerDown(event) {
-            // Remove navigation logic
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(sprites);
+
+            if (intersects.length > 0) {
+                const sprite = intersects[0].object;
+
+                if (!sprite.userData.isExpanded) {
+                    // 展開
+                    sprite.material.map = sprite.userData.contentTexture;
+                    sprite.scale.copy(sprite.userData.largeScale);
+                    sprite.userData.isExpanded = true;
+                } else {
+                    // 收起
+                    sprite.material.map = sprite.userData.iconTexture;
+                    sprite.scale.copy(sprite.userData.smallScale);
+                    sprite.userData.isExpanded = false;
+                }
+            }
         }
 
         function onWindowResize() {
