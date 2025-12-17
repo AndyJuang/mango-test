@@ -246,21 +246,12 @@
             const width = canvas.width;
             const height = canvas.height;
 
-            // Fill with silver overlay
-            ctx.fillStyle = '#C0C0C0';
-            ctx.fillRect(0, 0, width, height);
-
-            // Add some noise/texture to make it look like scratch card
-            ctx.fillStyle = '#000';
-            for (let i = 0; i < 500; i++) {
-                ctx.fillRect(Math.random() * width, Math.random() * height, 2, 2);
-            }
-
-            // Text on overlay
-            ctx.font = "30px 'Noto Serif TC'";
-            ctx.fillStyle = "#555";
-            ctx.textAlign = "center";
-            ctx.fillText("?", width / 2, height / 2);
+            // Load and draw the cover image
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, width, height);
+            };
+            img.src = 'scratch_cover.png';
 
             let isDrawing = false;
             let lastPoint = null;
@@ -384,7 +375,8 @@
                     {
                         title: "市集廣場",
                         content: "這裡是荷蘭時期的市集廣場，位於堡壘與市鎮中間，這裡有市集之外也有鐵匠工坊，你好像曾經從文獻有看到相關的記載內容。此外你在看到羅盤上顯示了一些文字。(小遊戲)",
-                        pos: { x: 0, y: -5, z: 45 }
+                        pos: { x: 0, y: -5, z: 45 },
+                        overlayImg: "market_square.jpg"
                     },
                     {
                         title: "義行劍獅",
@@ -572,8 +564,8 @@
         }
 
         function createSprite(infoData, themeColorHex) {
-            const width = infoData.width || 1200;
-            const height = infoData.height || 900;
+            const width = infoData.width || 1600; // Increased default
+            const height = infoData.height || 1200; // Increased default
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
@@ -585,7 +577,11 @@
             // Background
             ctx.fillStyle = "rgba(0,0,0,0.85)";
             ctx.beginPath();
-            ctx.roundRect(0, 0, width, height - 100, 40);
+            if (ctx.roundRect) {
+                ctx.roundRect(0, 0, width, height - 50, 40);
+            } else {
+                ctx.fillRect(0, 0, width, height - 50);
+            }
             ctx.fill();
 
             // Border
@@ -594,36 +590,79 @@
             ctx.stroke();
 
             // Title
-            ctx.font = "bold 80px 'Noto Serif TC'";
+            ctx.font = "bold 90px 'Noto Serif TC'";
             ctx.fillStyle = colorStr;
             ctx.textAlign = "left";
-            ctx.fillText(infoData.title, 80, 120);
+            ctx.fillText(infoData.title, 80, 130);
 
             // Separator Line
             ctx.beginPath();
             ctx.strokeStyle = "#555";
             ctx.lineWidth = 4;
-            ctx.moveTo(80, 150);
-            ctx.lineTo(width - 80, 150);
+            ctx.moveTo(80, 160);
+            ctx.lineTo(width - 80, 160);
             ctx.stroke();
 
             // Content - Multi-line Text Wrapping
-            ctx.font = "50px 'Noto Serif TC'";
+            ctx.font = "55px 'Noto Serif TC'";
             ctx.fillStyle = "#eee";
             ctx.textAlign = "left";
 
             // Draw content text with wrapping
             const textX = 80;
-            const textY = 220;
-            const maxWidth = width - 160;
-            const lineHeight = 75;
+            let textY = 240;
+            let maxWidth = width - 160;
+            const lineHeight = 80;
+
+            // 如果有圖片，進行排版調整 (side-by-side)
+            if (infoData.overlayImg) {
+                // 文字寬度減半 (留給圖片)
+                maxWidth = (width - 160) * 0.55;
+
+                // 載入並繪製圖片
+                const img = new Image();
+                img.onload = () => {
+                    // 計算圖片位置 (右側)
+                    const imgX = width * 0.6;
+                    const imgY = 240;
+                    const imgW = width * 0.35;
+                    const imgH = height * 0.6; // Allow taller image
+
+                    // 保持比例繪製 (contain)
+                    const aspect = img.width / img.height;
+                    let drawW = imgW;
+                    let drawH = drawW / aspect;
+                    if (drawH > imgH) {
+                        drawH = imgH;
+                        drawW = drawH * aspect;
+                    }
+
+                    // Center image horizontally in its area
+                    const areaCenterX = imgX + imgW / 2;
+                    const drawX = areaCenterX - drawW / 2;
+
+                    ctx.drawImage(img, drawX, imgY, drawW, drawH);
+
+                    // 畫個邊框給圖片
+                    ctx.strokeStyle = "#fff";
+                    ctx.lineWidth = 5;
+                    ctx.strokeRect(drawX, imgY, drawW, drawH);
+
+                    // Since sprite texture is already created, we need to update it
+                    // But here we are creating it initially. 
+                    // The texture needs to be updated after image loads.
+                    texture.needsUpdate = true;
+                };
+                img.src = infoData.overlayImg;
+            }
+
             wrapText(ctx, infoData.content, textX, textY, maxWidth, lineHeight);
 
             // Pointer (Triangle at bottom)
             ctx.beginPath();
             ctx.fillStyle = colorStr; // Use theme color for pointer
-            ctx.moveTo(width / 2 - 40, height - 100);
-            ctx.lineTo(width / 2 + 40, height - 100);
+            ctx.moveTo(width / 2 - 40, height - 50);
+            ctx.lineTo(width / 2 + 40, height - 50);
             ctx.lineTo(width / 2, height);
             ctx.fill();
 

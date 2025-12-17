@@ -246,21 +246,12 @@
             const width = canvas.width;
             const height = canvas.height;
 
-            // Fill with silver overlay
-            ctx.fillStyle = '#C0C0C0';
-            ctx.fillRect(0, 0, width, height);
-
-            // Add some noise/texture to make it look like scratch card
-            ctx.fillStyle = '#000';
-            for (let i = 0; i < 500; i++) {
-                ctx.fillRect(Math.random() * width, Math.random() * height, 2, 2);
-            }
-
-            // Text on overlay
-            ctx.font = "30px 'Noto Serif TC'";
-            ctx.fillStyle = "#555";
-            ctx.textAlign = "center";
-            ctx.fillText("?", width / 2, height / 2);
+            // Load and draw the cover image
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, width, height);
+            };
+            img.src = 'scratch_cover.png';
 
             let isDrawing = false;
             let lastPoint = null;
@@ -388,13 +379,15 @@
                     },
                     {
                         title: "住宅內",
-                        content: "屋內桌面凌亂，像是被匆忙翻找過。幾封書信散落其間，書信上可見外文署名與紅色封蠟，上面的文字你本來看不懂，但你透過羅盤的指引，貌似可以讀懂一些文字。\n\n「經長官閣下與議會查證，背信棄義的通事兼包稅商 何斌（Pinqua），違背其誓言與職責，不僅惡意拖欠高達123        之鉅款，更此乃極其可憎之事，暗中以海盜 國姓爺（Coxinga） 之名義，向本地居民徵收稅款。」",
-                        pos: { x: 0, y: -5, z: 45 }
+                        content: "屋內桌面凌亂，像是被匆忙翻找過。幾封書信散落其間，書信上可見外文署名與紅色封蠟，上面的文字你本來看不懂，但你透過羅盤的指引，貌似可以讀懂一些文字。\n\n「經長官閣下與議會查證，背信棄義的通事兼包稅商 何斌（Pinqua），違背其誓言與職責，不僅惡意拖欠高達123之鉅款，更此乃極其可憎之事，暗中以海盜國姓爺（Coxinga） 之名義，向本地居民徵收稅款。」",
+                        pos: { x: 0, y: -5, z: 45 },
+                        bgImg: "letter_bg.png"
                     },
                     {
                         title: "住宅",
                         content: "這是一棟位在巷弄內的住宅，雖然現在看起來好像是一座很普通的民宅，但是透過手上的羅盤，你感覺到這個房舍在以前比周圍房舍更加整齊。牆面留有修補過的痕跡，門框卻仍維持良好狀態，顯示屋主並非貧困之人。門邊掛著簡單卻工整的標示，像是經常有人來往、出入頻繁的住處。門上看起來貼有一張告示，但是被撕去一部份。",
-                        pos: { x: -25, y: -5, z: 25 }
+                        pos: { x: -25, y: -5, z: 25 },
+                        overlayImg: "door_notice.png"
                     },
                     {
                         title: "人影",
@@ -680,8 +673,8 @@
 
         function createContentTexture(infoData, themeColorHex) {
             // 大幅放大 Canvas 解析度以容納長文字
-            const width = 1200;
-            const height = 900;
+            const width = 1600;
+            const height = 1200;
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
@@ -690,52 +683,108 @@
             const color = new THREE.Color(themeColorHex);
             const colorStr = `rgb(${color.r * 255},${color.g * 255},${color.b * 255})`;
 
-            // 背景
-            ctx.fillStyle = "rgba(0,0,0,0.85)";
-            ctx.fillRect(0, 0, width, height - 50); // reserve bottom for pointer
+            const texture = new THREE.CanvasTexture(canvas);
 
-            // 邊框
-            ctx.strokeStyle = colorStr;
-            ctx.lineWidth = 15;
-            ctx.strokeRect(10, 10, width - 20, height - 70);
+            // 繪製內容的函式 (封裝以便異步呼叫)
+            const drawContent = () => {
+                // 如果沒有背景圖，就畫預設背景
+                if (!infoData.bgImg) {
+                    ctx.fillStyle = "rgba(0,0,0,0.85)";
+                    ctx.fillRect(0, 0, width, height - 50);
+                }
 
-            // 標題 (Title)
-            ctx.font = "bold 80px 'Noto Serif TC'";
-            ctx.fillStyle = colorStr; // Use theme color for title for contrast
-            ctx.textAlign = "center";
-            ctx.fillText(infoData.title, width / 2, 120);
+                // 邊框
+                ctx.strokeStyle = colorStr;
+                ctx.lineWidth = 15;
+                ctx.strokeRect(10, 10, width - 20, height - 70);
 
-            // 分隔線
-            ctx.beginPath();
-            ctx.moveTo(100, 150);
-            ctx.lineTo(width - 100, 150);
-            ctx.strokeStyle = "#888";
-            ctx.lineWidth = 2;
-            ctx.stroke();
+                // 標題 (Title)
+                ctx.font = "bold 90px 'Noto Serif TC'";
+                // 如果有背景圖，標題顏色可能要調整，這裡暫時維持主題色或深色
+                ctx.fillStyle = infoData.bgImg ? "#3e2723" : colorStr;
+                ctx.textAlign = "center";
+                ctx.fillText(infoData.title, width / 2, 130);
 
-            // 內文 (Content) - Multi-line Text Wrapping
-            ctx.font = "50px 'Noto Serif TC'";
-            ctx.fillStyle = "#eee";
-            ctx.textAlign = "left"; // Align left for paragraphs
+                // 分隔線
+                ctx.beginPath();
+                ctx.moveTo(100, 160);
+                ctx.lineTo(width - 100, 160);
+                ctx.strokeStyle = infoData.bgImg ? "#5d4037" : "#888";
+                ctx.lineWidth = 2;
+                ctx.stroke();
 
-            const textX = 80;
-            const textY = 220;
-            const maxWidth = width - 160;
-            const lineHeight = 75;
+                // 內文與圖片配置
+                ctx.font = "55px 'Noto Serif TC'";
+                // 如果有背景圖 (信紙)，文字改為深褐色；否則維持淺灰
+                ctx.fillStyle = infoData.bgImg ? "#4e342e" : "#eee"; // Material Brown 800ish for paper
+                ctx.textAlign = "left";
 
-            wrapText(ctx, infoData.content, textX, textY, maxWidth, lineHeight);
+                const textX = 80;
+                let textY = 240;
+                const lineHeight = 80;
+                let maxWidth = width - 160;
 
-            // 下方指標
-            ctx.beginPath();
-            ctx.fillStyle = colorStr;
-            const centerX = width / 2;
-            const bottomY = height - 50;
-            ctx.moveTo(centerX - 30, bottomY);
-            ctx.lineTo(centerX + 30, bottomY);
-            ctx.lineTo(centerX, height);
-            ctx.fill();
+                // 如果有側邊圖片 (overlayImg)，進行排版調整 (side-by-side)
+                if (infoData.overlayImg) {
+                    maxWidth = (width - 160) * 0.55;
 
-            return new THREE.CanvasTexture(canvas);
+                    const img = new Image();
+                    img.onload = () => {
+                        const imgX = width * 0.6;
+                        const imgY = 240;
+                        const imgW = width * 0.35;
+                        const imgH = height * 0.6;
+
+                        const aspect = img.width / img.height;
+                        let drawW = imgW;
+                        let drawH = drawW / aspect;
+                        if (drawH > imgH) { drawH = imgH; drawW = drawH * aspect; }
+
+                        const areaCenterX = imgX + imgW / 2;
+                        const drawX = areaCenterX - drawW / 2;
+
+                        ctx.drawImage(img, drawX, imgY, drawW, drawH);
+                        ctx.strokeStyle = "#fff";
+                        ctx.lineWidth = 5;
+                        ctx.strokeRect(drawX, imgY, drawW, drawH);
+                        texture.needsUpdate = true;
+                    };
+                    img.src = infoData.overlayImg;
+                }
+
+                wrapText(ctx, infoData.content, textX, textY, maxWidth, lineHeight);
+
+                // 下方指標
+                ctx.beginPath();
+                ctx.fillStyle = colorStr;
+                const centerX = width / 2;
+                const bottomY = height - 50;
+                ctx.moveTo(centerX - 30, bottomY);
+                ctx.lineTo(centerX + 30, bottomY);
+                ctx.lineTo(centerX, height);
+                ctx.fill();
+
+                texture.needsUpdate = true;
+            };
+
+            // 處理背景圖片載入
+            if (infoData.bgImg) {
+                const bg = new Image();
+                bg.onload = () => {
+                    // 繪製背景圖填滿整個內容區 (扣掉指標區)
+                    ctx.drawImage(bg, 0, 0, width, height - 50);
+                    // 畫個半透明遮罩確保文字可讀 (可選，視圖片深淺而定，這裡信紙圖案清晰所以主要靠文字變色)
+                    // ctx.fillStyle = "rgba(255,255,255,0.3)";
+                    // ctx.fillRect(0, 0, width, height - 50);
+
+                    drawContent(); // 背景載入後再畫文字
+                };
+                bg.src = infoData.bgImg;
+            } else {
+                drawContent(); // 直接畫
+            }
+
+            return texture;
         }
 
         function createIconTexture(themeColorHex) {
@@ -757,7 +806,7 @@
             ctx.stroke();
 
             // 驚嘆號 !
-            ctx.fillStyle = colorStr;
+            ctx.fillStyle = "#FFFF00";
             ctx.font = "bold 80px 'Noto Serif TC', serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
@@ -778,7 +827,7 @@
 
             // 初始大小：小圖示
             const smallScale = new THREE.Vector3(5, 5, 1);
-            const largeScale = new THREE.Vector3(30, 22.5, 1);
+            const largeScale = new THREE.Vector3(40, 30, 1); // Increased scale to match new resolution
 
             sprite.scale.copy(smallScale);
 
@@ -787,7 +836,8 @@
                 iconTexture: iconTexture,
                 contentTexture: contentTexture,
                 smallScale: smallScale,
-                largeScale: largeScale
+                largeScale: largeScale,
+                overlayImg: infoData.overlayImg // Store overlay image path
             };
 
             scene.add(sprite);

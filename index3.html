@@ -246,21 +246,12 @@
             const width = canvas.width;
             const height = canvas.height;
 
-            // Fill with silver overlay
-            ctx.fillStyle = '#C0C0C0';
-            ctx.fillRect(0, 0, width, height);
-
-            // Add some noise/texture to make it look like scratch card
-            ctx.fillStyle = '#000';
-            for (let i = 0; i < 500; i++) {
-                ctx.fillRect(Math.random() * width, Math.random() * height, 2, 2);
-            }
-
-            // Text on overlay
-            ctx.font = "30px 'Noto Serif TC'";
-            ctx.fillStyle = "#555";
-            ctx.textAlign = "center";
-            ctx.fillText("?", width / 2, height / 2);
+            // Load and draw the cover image
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, width, height);
+            };
+            img.src = 'scratch_cover.png';
 
             let isDrawing = false;
             let lastPoint = null;
