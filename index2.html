@@ -186,7 +186,7 @@
     <div id="scratch-overlay">
         <div id="scratch-container">
             <div id="secret-content">
-                <div id="secret-text">消失的契約</div>
+                <div id="secret-text"></div>
                 <button id="enter-game-btn">進入記憶</button>
             </div>
             <canvas id="scratch-canvas" width="600" height="400"></canvas>
@@ -384,9 +384,10 @@
                     },
                     {
                         title: "另一名男子",
-                        content: "眼前這個人，看起來是一個富有的漢人，但顯然也不是這個時代的人。「……可惡，還是慢了一步。」（他看了一眼四周，又轉頭看向你手上的羅盤。）「你剛才都看到了吧？」「既然你已經知道我們的事，那我也沒必要再裝作什麼都沒發生。」「想知道發生什麼事的話，來這裡找我吧」",
+                        content: "眼前這個人，看起來是一個富有的漢人，但顯然也不是這個時代的人。\n「……可惡，還是慢了一步。」（他看了一眼四周，又轉頭看向你手上的羅盤。）\n「你剛才都看到了吧？」\n「既然你已經知道我們的事，那我也沒必要再裝作什麼都沒發生。」\n「想知道發生什麼事的話，來這裡找我吧」\n他丟下三枚荷蘭錢幣之後離開了",
                         pos: { x: 0, y: -5, z: -45 },
-                        overlayImg: "man_portrait.png"
+                        overlayImg: "man_portrait.png",
+                        coins: ['coin.png', 'coin.png', 'coin.png']
                     },
                     {
                         title: "文朱殿",
@@ -626,7 +627,7 @@
         function createContentTexture(infoData, themeColorHex) {
             // 大幅放大 Canvas 解析度以容納長文字
             const width = 1600;
-            const height = 1200;
+            const height = 1400; // Increase height to prevent text truncation
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
@@ -706,14 +707,36 @@
 
                     ctx.drawImage(img, drawX, imgY, drawW, drawH);
 
-                    // 畫個邊框給圖片
-                    ctx.strokeStyle = "#fff";
-                    ctx.lineWidth = 5;
-                    ctx.strokeRect(drawX, imgY, drawW, drawH);
+
 
                     texture.needsUpdate = true; // 通知 Three.js 更新貼圖
                 };
                 img.src = infoData.overlayImg;
+            }
+            // 有錢幣時，繪製在下方 (Multiple coins at bottom)
+            if (infoData.coins && infoData.coins.length > 0) {
+                const coinSize = 250;
+                const startY = 1050; // Use 1050 to move coins further down
+                const centerX = width / 4; // 改為偏左 (width / 4) 以避開右側人像
+
+                // 3枚硬幣水平排列，略微錯落
+                const offsets = [
+                    { x: -50, y: 0 },
+                    { x: 200, y: -50 },
+                    { x: 450, y: 0 }
+                ];
+
+                infoData.coins.forEach((src, index) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const drawX = centerX + offsets[index].x - coinSize / 2;
+                        const drawY = startY + offsets[index].y;
+
+                        ctx.drawImage(img, drawX, drawY, coinSize, coinSize);
+                        texture.needsUpdate = true;
+                    };
+                    img.src = src;
+                });
             }
 
             wrapText(ctx, infoData.content, textX, textY, maxWidth, lineHeight);
